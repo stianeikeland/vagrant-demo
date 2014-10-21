@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$dbscript = <<SCRIPT
+apt-get update --fix-missing
+apt-get install -q -y redis-server
+
+# Configure redis to listen on all interfaces
+sed -i "s/bind 127.0.0.1/bind 0.0.0.0/g" /etc/redis/redis.conf
+service redis-server restart
+SCRIPT
+
+$webscript = <<SCRIPT
+apt-get update --fix-missing
+apt-get install -q -y cowsay software-properties-common \
+    make git curl tmux gcc build-essential
+
+# Install nodejs
+add-apt-repository -y ppa:chris-lea/node.js && apt-get update
+apt-get install -q -y nodejs
+
+SCRIPT
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.define :web do |web|
+    web.vm.box = "ubuntu/trusty64"
+    web.vm.network :private_network, ip: "192.168.33.2"
+    web.vm.network :forwarded_port, guest: 4000, host: 4000
+    web.vm.provision :shell, inline: $webscript
+  end
+
+  config.vm.define :db do |db|
+    db.vm.box = "ubuntu/trusty64"
+    db.vm.network :private_network, ip: "192.168.33.3"
+    db.vm.provision :shell, inline: $dbscript
+  end
+
+end
