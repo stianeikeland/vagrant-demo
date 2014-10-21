@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# THIS IS A FEATURE PREVIEW!
+
+boxes = {
+    "XPIE6"     => "http://aka.ms/vagrant-xp-ie6",
+    "XPIE8"     => "http://aka.ms/vagrant-xp-ie8",
+    "VistaIE7"  => "http://aka.ms/vagrant-vista-ie7",
+    "Win7IE8"   => "http://aka.ms/vagrant-win7-ie8",
+    "Win7IE9"   => "http://aka.ms/vagrant-win7-ie9",
+    "Win7IE10"  => "http://aka.ms/vagrant-win7-ie10",
+    "Win7IE11"  => "http://aka.ms/vagrant-win7-ie11",
+    "Win8IE10"  => "http://aka.ms/vagrant-win8-ie10",
+    "Win81IE11"  => "http://aka.ms/vagrant-win81-ie11",
+}
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.communicator = "winrm"
+  config.vm.guest = :windows
+  config.winrm.timeout = 500
+
+  config.vm.box = boxes["XPIE6"]
+
+  config.vm.network :forwarded_port, guest: 3389, host: 3389
+
+  config.vm.provider "virtualbox" do |v|
+    v.gui = true
+    v.customize ["modifyvm", :id, "--memory", "2048"]
+  end
+
+end
