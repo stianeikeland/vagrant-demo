@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<SCRIPT
+echo I am provisioning...
+
+apt-get update --fix-missing
+apt-get install -q -y cowsay software-properties-common \
+    make git curl tmux gcc build-essential
+
+# Install nodejs
+add-apt-repository -y ppa:chris-lea/node.js && apt-get update
+apt-get install -q -y nodejs
+
+# Install redis
+apt-get install -y redis-server
+
+echo "Ready to go!\n\nNode: $(node -v)" | /usr/games/cowsay
+
+SCRIPT
+
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.provider :digital_ocean do |provider, override|
+    override.ssh.private_key_path = '~/.ssh/id_rsa'
+    override.vm.box = 'digital_ocean'
+    override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+
+    provider.token = '0c32b892a2a947b22b361ebfa57a265e895215f202ec03240bd38db9e2ab7c91'
+    provider.image = 'Ubuntu 14.04 x64'
+    provider.region = 'ams3'
+    provider.size = '512mb'
+  end
+
+  config.vm.provision :shell, inline: $script
+end
